@@ -19,12 +19,17 @@ canvas.width = 512;
 canvas.height = 480;
 document.body.appendChild(canvas);
 
-let bgReady, heroReady, monsterReady;
-let bgImage, heroImage, monsterImage;
+let bgReady, heroReady, asteroidReady;
+let bgImage, heroImage, asteroidImage;
 
 let startTime = Date.now();
-const SECONDS_PER_ROUND = 30;
+const SECONDS_PER_ROUND = 15;
 let elapsedTime = 0;
+
+let score = 0;
+
+let nameMessage = ''
+let history = []
 
 function loadImages() {
   bgImage = new Image();
@@ -32,20 +37,20 @@ function loadImages() {
     // show the background image
     bgReady = true;
   };
-  bgImage.src = "images/background.png";
+  bgImage.src = "images/space-background.png";
   heroImage = new Image();
   heroImage.onload = function () {
     // show the hero image
     heroReady = true;
   };
-  heroImage.src = "images/hero.png";
+  heroImage.src = "images/spaceship.png";
 
-  monsterImage = new Image();
-  monsterImage.onload = function () {
+  asteroidImage = new Image();
+  asteroidImage.onload = function () {
     // show the monster image
-    monsterReady = true;
+    asteroidReady = true;
   };
-  monsterImage.src = "images/monster.png";
+  asteroidImage.src = "images/asteroid.png";
 }
 
 /** 
@@ -61,8 +66,8 @@ function loadImages() {
 let heroX = canvas.width / 2;
 let heroY = canvas.height / 2;
 
-let monsterX = 100;
-let monsterY = 100;
+let asteroidX = 100;
+let asteroidY = 100;
 
 /** 
  * Keyboard Listeners
@@ -83,6 +88,13 @@ function setupKeyboardListeners() {
   }, false);
 }
 
+function nameScreen() {
+  let username = document.getElementById("name").value
+  nameCap = username.charAt(0).toUpperCase() + username.slice(1).toLowerCase()
+  nameMessage = "Welcome, " + nameCap + "!"
+  document.getElementById("nameArea").innerHTML = `${nameMessage}`
+  $('#name').val('');
+}
 
 /**
  *  Update game objects - change player position based on key pressed
@@ -90,8 +102,12 @@ function setupKeyboardListeners() {
  *  
  *  If you change the value of 5, the player will move at a different rate.
  */
+
 let update = function () {
   // Update the time.
+  if (elapsedTime >= SECONDS_PER_ROUND) {
+    return;
+  }
   elapsedTime = Math.floor((Date.now() - startTime) / 1000);
 
 
@@ -108,18 +124,31 @@ let update = function () {
     heroX += 5;
   }
 
+  if (heroX < 0) {
+    heroX = canvas.width - 51
+  } else if (heroX > canvas.width) {
+    heroX = 0
+  }
+
+  if (heroY < 0) {
+    heroY = canvas.height - 42
+  } else if (heroY > canvas.height) {
+    heroY = 0
+  }
+
   // Check if player and monster collided. Our images
   // are about 32 pixels big.
   if (
-    heroX <= (monsterX + 32)
-    && monsterX <= (heroX + 32)
-    && heroY <= (monsterY + 32)
-    && monsterY <= (heroY + 32)
+    heroX <= (asteroidX + 51)
+    && asteroidX <= (heroX + 51)
+    && heroY <= (asteroidY + 42)
+    && asteroidY <= (heroY + 42)
   ) {
     // Pick a new location for the monster.
     // Note: Change this to place the monster at a new, random location.
-    monsterX = monsterX + 50;
-    monsterY = monsterY + 70;
+    asteroidX = Math.floor(Math.random() * (canvas.width - 51))
+    asteroidY = Math.floor(Math.random() * (canvas.height - 42))
+    score++
   }
 };
 
@@ -133,11 +162,27 @@ var render = function () {
   if (heroReady) {
     ctx.drawImage(heroImage, heroX, heroY);
   }
-  if (monsterReady) {
-    ctx.drawImage(monsterImage, monsterX, monsterY);
+  if (asteroidReady) {
+    ctx.drawImage(asteroidImage, asteroidX, asteroidY);
   }
-  ctx.fillText(`Seconds Remaining: ${SECONDS_PER_ROUND - elapsedTime}`, 20, 100);
+  history.push(score)
+  document.getElementById("timer").innerHTML = `${SECONDS_PER_ROUND - elapsedTime}`
+  document.getElementById("score").innerHTML = `${score}`
+  document.getElementById("history").innerHTML = `${score}`
 };
+
+function reset() {
+  let startTime = Date.now();
+  let elapsedTime = 0;
+  let heroX = canvas.width / 2;
+  let heroY = canvas.height / 2;
+
+  let asteroidX = 100;
+  let asteroidY = 100;
+
+  console.log("This is my reset button")
+
+}
 
 /**
  * The main game loop. Most every game will have two distinct parts:
@@ -145,7 +190,7 @@ var render = function () {
  * render (based on the state of our game, draw the right things)
  */
 var main = function () {
-  update(); 
+  update();
   render();
   // Request to do this again ASAP. This is a special method
   // for web browsers. 
@@ -157,7 +202,10 @@ var main = function () {
 var w = window;
 requestAnimationFrame = w.requestAnimationFrame || w.webkitRequestAnimationFrame || w.msRequestAnimationFrame || w.mozRequestAnimationFrame;
 
+function startGame() {
+  main()
+}
+
 // Let's play this game!
 loadImages();
 setupKeyboardListeners();
-main();
