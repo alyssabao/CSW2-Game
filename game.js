@@ -66,6 +66,10 @@ function loadImages() {
     alienReady = true;
   };
   alienImage.src = "images/alien-ship.png";
+
+  collisionSound = new Audio("audio/break-rock.mp4")
+  captureSound = new Audio("audio/alien-death.mp4")
+  goSound = new Audio("audio/game-over.mp4")
 }
 
 /** 
@@ -88,6 +92,10 @@ let alienX = 10;
 let alienY = 430;
 let alienDirectionX = 1;
 let alienDirectionY = 1;
+
+let collisionSound;
+let captureSound;
+let goSound;
 
 /** 
  * Keyboard Listeners
@@ -128,6 +136,8 @@ highScore = Math.max(score, highScore);
 localStorage.setItem(localStorageName, highScore)
 document.getElementById("highScore").innerHTML = `${highScore}`
 
+setTimeout("goSound.play()",15000);
+
 let update = function () {
   // Update the time.
   if (elapsedTime >= SECONDS_PER_ROUND) {
@@ -140,6 +150,7 @@ let update = function () {
     && heroY <= (alienY + 42)
     && alienY <= (heroY + 42)
   ) {
+    captureSound.play();
     elapsedTime = SECONDS_PER_ROUND
     return;
   }
@@ -189,6 +200,7 @@ let update = function () {
   ) {
     // Pick a new location for the monster.
     // Note: Change this to place the monster at a new, random location.
+    collisionSound.play();
     asteroidX = Math.floor(Math.random() * (canvas.width - 51))
     asteroidY = Math.floor(Math.random() * (canvas.height - 42))
     score++
@@ -232,6 +244,8 @@ function reset() {
 
   alienX = 10;
   alienY = 430;
+
+  setTimeout("goSound.play()",15000);
 
   console.log("This is my reset button")
 
