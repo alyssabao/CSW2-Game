@@ -27,6 +27,8 @@ const SECONDS_PER_ROUND = 15;
 let elapsedTime = 0;
 
 let score = 0;
+let localStorageName = "playerScore";
+let highScore;
 
 let nameMessage = ''
 let history = []
@@ -109,14 +111,17 @@ function nameScreen() {
  *  If you change the value of 5, the player will move at a different rate.
  */
 
+highScore = localStorage.getItem(localStorageName) == null ? 0 : localStorage.getItem(localStorageName)
+  highScore = Math.max(score, highScore);
+  localStorage.setItem(localStorageName, highScore)
+  document.getElementById("highScore").innerHTML = `${highScore}`
+
 let update = function () {
   // Update the time.
   if (elapsedTime >= SECONDS_PER_ROUND) {
     return;
   }
   elapsedTime = Math.floor((Date.now() - startTime) / 1000);
-
-
   if (38 in keysDown) { // Player is holding up key
     heroY -= 5;
   }
@@ -219,6 +224,3 @@ function startGame() {
 // Let's play this game!
 loadImages();
 setupKeyboardListeners();
-
-history.push(score)
-document.getElementById("history").innerHTML = `${history}`
