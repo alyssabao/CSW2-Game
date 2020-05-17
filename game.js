@@ -59,6 +59,13 @@ function loadImages() {
     asteroidReady = true;
   };
   asteroidImage.src = "images/asteroid.png";
+
+  alienImage = new Image();
+  alienImage.onload = function () {
+    // show the monster image
+    alienReady = true;
+  };
+  alienImage.src = "images/alien-ship.png";
 }
 
 /** 
@@ -76,6 +83,11 @@ let heroY = canvas.height / 2;
 
 let asteroidX = 100;
 let asteroidY = 100;
+
+let alienX = 10;
+let alienY = 430;
+let alienDirectionX = 1;
+let alienDirectionY = 1;
 
 /** 
  * Keyboard Listeners
@@ -112,9 +124,9 @@ function nameScreen() {
  */
 
 highScore = localStorage.getItem(localStorageName) == null ? 0 : localStorage.getItem(localStorageName)
-  highScore = Math.max(score, highScore);
-  localStorage.setItem(localStorageName, highScore)
-  document.getElementById("highScore").innerHTML = `${highScore}`
+highScore = Math.max(score, highScore);
+localStorage.setItem(localStorageName, highScore)
+document.getElementById("highScore").innerHTML = `${highScore}`
 
 let update = function () {
   // Update the time.
@@ -122,6 +134,15 @@ let update = function () {
     return;
   }
   elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+  if (
+    heroX <= (alienX + 51)
+    && alienX <= (heroX + 51)
+    && heroY <= (alienY + 42)
+    && alienY <= (heroY + 42)
+  ) {
+    elapsedTime = SECONDS_PER_ROUND
+    return;
+  }
   if (38 in keysDown) { // Player is holding up key
     heroY -= 5;
   }
@@ -133,6 +154,17 @@ let update = function () {
   }
   if (39 in keysDown) { // Player is holding right key
     heroX += 5;
+  }
+
+  alienX -= alienDirectionX * 3;
+  alienY -= alienDirectionY * 3;
+
+  if (alienX > canvas.width - 51 || alienX < 0) {
+    alienDirectionX = -alienDirectionX;
+  }
+
+  if (alienY > canvas.height - 42 || alienY < 0) {
+    alienDirectionY = -alienDirectionY;
   }
 
   if (heroX < 0) {
@@ -176,6 +208,9 @@ var render = function () {
   if (asteroidReady) {
     ctx.drawImage(asteroidImage, asteroidX, asteroidY);
   }
+  if (alienReady) {
+    ctx.drawImage(alienImage, alienX, alienY)
+  }
   if (elapsedTime >= SECONDS_PER_ROUND) {
     if (goReady) {
       ctx.drawImage(goImage, 0, 0);
@@ -194,6 +229,9 @@ function reset() {
 
   asteroidX = 100;
   asteroidY = 100;
+
+  alienX = 10;
+  alienY = 430;
 
   console.log("This is my reset button")
 
