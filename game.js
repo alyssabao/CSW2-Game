@@ -19,8 +19,8 @@ canvas.width = 512;
 canvas.height = 480;
 document.body.appendChild(canvas);
 
-let bgReady, heroReady, asteroidReady;
-let bgImage, heroImage, asteroidImage;
+let bgReady, goReady, heroReady, asteroidReady;
+let bgImage, goImage, heroImage, asteroidImage;
 
 let startTime = Date.now();
 const SECONDS_PER_ROUND = 15;
@@ -38,6 +38,12 @@ function loadImages() {
     bgReady = true;
   };
   bgImage.src = "images/space-background.png";
+  goImage = new Image();
+  goImage.onload = function () {
+    // show the game over image
+    goReady = true;
+  };
+  goImage.src = "images/game-over.png";
   heroImage = new Image();
   heroImage.onload = function () {
     // show the hero image
@@ -165,20 +171,24 @@ var render = function () {
   if (asteroidReady) {
     ctx.drawImage(asteroidImage, asteroidX, asteroidY);
   }
-  history.push(score)
+  if (elapsedTime >= SECONDS_PER_ROUND) {
+    if (goReady) {
+      ctx.drawImage(goImage, 0, 0);
+    }
+  }
   document.getElementById("timer").innerHTML = `${SECONDS_PER_ROUND - elapsedTime}`
   document.getElementById("score").innerHTML = `${score}`
-  document.getElementById("history").innerHTML = `${score}`
 };
 
 function reset() {
-  let startTime = Date.now();
-  let elapsedTime = 0;
-  let heroX = canvas.width / 2;
-  let heroY = canvas.height / 2;
+  startTime = Date.now();
+  elapsedTime = 0;
+  heroX = canvas.width / 2;
+  heroY = canvas.height / 2;
+  score = 0;
 
-  let asteroidX = 100;
-  let asteroidY = 100;
+  asteroidX = 100;
+  asteroidY = 100;
 
   console.log("This is my reset button")
 
@@ -209,3 +219,6 @@ function startGame() {
 // Let's play this game!
 loadImages();
 setupKeyboardListeners();
+
+history.push(score)
+document.getElementById("history").innerHTML = `${history}`
