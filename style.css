@@ -46,3 +46,7 @@ h3 {
     color: lightgray;
     margin-top: 5px;
 }
+
+h4 {
+    font-weight: bold;
+}
